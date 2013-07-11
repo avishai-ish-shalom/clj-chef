@@ -19,13 +19,13 @@
 (facts "`defrest` generated functions for node"
   (let [node-path (str "/nodes/" node-id)]
     (fact (node-list) => (just {})
-      (provided (chef-rest ...config... :get "/nodes") => {:body "{}"}))
+      (provided (chef-rest ...config... :get "/nodes" nil) => {:body "{}"}))
     (fact (node-show node-id) => {"id" node-id}
       (provided 
-        (chef-rest ...config... :get node-path) => {:body (json/generate-string {"id" node-id})}))
+        (chef-rest ...config... :get node-path nil) => {:body (json/generate-string {"id" node-id})}))
      (fact (node-delete node-id) => {"id" node-id}
       (provided 
-        (chef-rest ...config... :delete node-path) => {:body (json/generate-string {"id" node-id})}))
+        (chef-rest ...config... :delete node-path nil) => {:body (json/generate-string {"id" node-id})}))
      (fact "node-create"
       (node-create node-id ...node-data...) => {"id" node-id}
       (provided
@@ -36,13 +36,13 @@
 (facts "`defrest` generated functions for role"
   (let [role-path (str "/roles/" role-id)]
     (fact (role-list) => (just {})
-      (provided (chef-rest ...config... :get "/roles") => {:body "{}"}))
+      (provided (chef-rest ...config... :get "/roles" nil) => {:body "{}"}))
     (fact (role-show role-id) => {"id" role-id}
       (provided 
-        (chef-rest ...config... :get role-path) => {:body (json/generate-string {"id" role-id})}))
+        (chef-rest ...config... :get role-path nil) => {:body (json/generate-string {"id" role-id})}))
      (fact (role-delete role-id) => {"id" role-id}
       (provided 
-        (chef-rest ...config... :delete role-path) => {:body (json/generate-string {"id" role-id})}))
+        (chef-rest ...config... :delete role-path nil) => {:body (json/generate-string {"id" role-id})}))
      (fact "role-create"
       (role-create role-id ...role-data...) => {"id" role-id}
       (provided
@@ -53,13 +53,13 @@
 (facts "`defrest` generated functions for cookbook"
   (let [cookbook-path (str "/cookbooks/" cookbook-id)]
     (fact (cookbook-list) => (just {})
-      (provided (chef-rest ...config... :get "/cookbooks") => {:body "{}"}))
+      (provided (chef-rest ...config... :get "/cookbooks" nil) => {:body "{}"}))
     (fact (cookbook-show cookbook-id) => {"id" cookbook-id}
       (provided 
-        (chef-rest ...config... :get cookbook-path) => {:body (json/generate-string {"id" cookbook-id})}))
+        (chef-rest ...config... :get cookbook-path nil) => {:body (json/generate-string {"id" cookbook-id})}))
      (fact (cookbook-delete cookbook-id) => {"id" cookbook-id}
       (provided 
-        (chef-rest ...config... :delete cookbook-path) => {:body (json/generate-string {"id" cookbook-id})}))
+        (chef-rest ...config... :delete cookbook-path nil) => {:body (json/generate-string {"id" cookbook-id})}))
      (fact "cookbook-create"
       (cookbook-create cookbook-id ...cookbook-data...) => {"id" cookbook-id}
       (provided
@@ -71,13 +71,13 @@
 (facts "`defrest` generated functions for environment"
   (let [environment-path (str "/environments/" environment-id)]
     (fact (environment-list) => (just {})
-      (provided (chef-rest ...config... :get "/environments") => {:body "{}"}))
+      (provided (chef-rest ...config... :get "/environments" nil) => {:body "{}"}))
     (fact (environment-show environment-id) => {"id" environment-id}
       (provided 
-        (chef-rest ...config... :get environment-path) => {:body (json/generate-string {"id" environment-id})}))
+        (chef-rest ...config... :get environment-path nil) => {:body (json/generate-string {"id" environment-id})}))
      (fact (environment-delete environment-id) => {"id" environment-id}
       (provided 
-        (chef-rest ...config... :delete environment-path) => {:body (json/generate-string {"id" environment-id})}))
+        (chef-rest ...config... :delete environment-path nil) => {:body (json/generate-string {"id" environment-id})}))
      (fact "environment-create"
       (environment-create environment-id ...environment-data...) => {"id" environment-id}
       (provided

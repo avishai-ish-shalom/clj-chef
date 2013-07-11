@@ -10,6 +10,7 @@
 (def chef-api-version "11.4.4")
 (def ^:private iso8601 (time-format/formatters :date-time-no-ms))
 (def ^:private default-http-opts {:accept :json :content-type :json})
+(def ^:dynamic *chef-config* {})
 
 ; auth-* functions are in clj-chef.utils namespace
 (defn chef-rest
@@ -35,17 +36,35 @@
 (defn- parse-object [obj-type response]
   (json/parse-string (:body response)))
 
-(defn split-path-spec [path-spec]
+(defn- split-path-spec [path-spec]
   (let [spec
         (for [part (string/split path-spec #"/") :when (not (empty? part))]
           (if (.startsWith part ":")
-            (symbol (string/replace-first part ":" ""))
+            (keyword (string/replace-first part ":" ""))
             part
         ))]
-    [(cons "" spec) (filter symbol? spec)]))
+    [(cons "" spec) (map (comp symbol name) (filter keyword? spec))]))
 
 
 (def ^:private vec-butlast (comp vec butlast))
+
+(defn zip-args [path-parts args] 
+	(if (empty? path-parts) []
+		(let [	[p & more-parts] path-parts 
+				[a & more-args] args]
+			(if (keyword? p) 
+				(cons a (zip-args more-parts more-args)) 
+				(cons p (zip-args more-parts args))))))
+
+(defn chef-rest-call 
+	([method path-spec path-args] (chef-rest-call method path-spec path-args nil))
+	([method path-spec path-args data]
+		(let [resource-path (string/join "/" (zip-args path-spec path-args))
+			  opts (when data {:body data})
+			]
+			(json/parse-string
+				(:body (chef-rest *chef-config* method resource-path opts)
+	)))))
 
 ;  the book says generating multiple defs from one macro is bad.
 ;  let's do it anyway (until i figure out how to do it the proper way and still have nice syntax)
@@ -57,19 +76,21 @@
        ]
     (concat `(do)
       ; define *-list functions
-      (when (= (last path-components) 'id)
-        (list `(defn ~((comp symbol str) (name model) "-list")
-                 ~(vec-butlast arguments)
-          ; needed to use ~'*chef-config* instead of *chef-config* to make the symbol namespace relative
-          (json/parse-string (:body (chef-rest ~'*chef-config* :get (string/join "/" ~(vec-butlast path-components))))))))
+      (when (= (last path-components) :id)
+      	(let [args (vec-butlast arguments)
+      		  path-components (vec-butlast path-components)
+      		  fname ((comp symbol str) (name model) "-list")
+      		 ]
+        	(list `(defn ~fname ~args
+          		(chef-rest-call :get ~path-components ~args)))))
+      
       (for [method methods :let [fname ((comp symbol str) (name model) "-" (method methods-func-names))]]
         (case method
-          :put (let [obj-sym (gensym 'obj)] `(defn ~fname ~(conj arguments obj-sym)
-                  (json/parse-string (:body (chef-rest ~'*chef-config* ~method
-                                             (string/join "/" ~path-components)
-                                             {:body (json/generate-string ~obj-sym)})))))
+          :put (let [obj-sym (gensym 'obj) args (conj arguments obj-sym)] 
+          	`(defn ~fname ~args
+                  (chef-rest-call ~method ~path-components ~arguments 
+                                            (json/generate-string ~obj-sym))))
           ; default
           `(defn ~fname ~arguments
-            (json/parse-string
-              (:body (chef-rest ~'*chef-config* ~method (string/join "/" ~path-components)))))))
-    )))
+            (chef-rest-call ~method ~path-components ~arguments))
+    )))))

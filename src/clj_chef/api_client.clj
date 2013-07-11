@@ -2,7 +2,7 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.tools.logging :as logging]
-            [clj-chef.rest :refer [defrest chef-rest]])
+            [clj-chef.rest :refer [defrest chef-rest *chef-config*]])
   (:import [org.bouncycastle.openssl PEMReader])
 )
 
@@ -14,9 +14,6 @@
               PEMReader.
               .readObject
               .getPrivate))
-
-
-(def ^:dynamic *chef-config* nil)
 
 (defmacro with-config [config & forms]
   `(binding [*chef-config* ~config]
