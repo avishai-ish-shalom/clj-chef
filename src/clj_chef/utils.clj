@@ -1,6 +1,5 @@
 (ns clj-chef.utils
   (:require [clj-http.client :as http-client]
-            [cheshire.core :as json]
             [clojure.string :as string]
             [clj-time.format :as time-format]
             [clj-time.core :as t]

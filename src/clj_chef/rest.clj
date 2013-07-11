@@ -42,7 +42,7 @@
             (symbol (string/replace-first part ":" ""))
             part
         ))]
-    [spec (filter symbol? spec)]))
+    [(cons "" spec) (filter symbol? spec)]))
 
 
 (def ^:private vec-butlast (comp vec butlast))
