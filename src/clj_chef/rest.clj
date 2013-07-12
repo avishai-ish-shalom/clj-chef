@@ -23,7 +23,7 @@
   (let [ resource-path (if organization (string/join "/" ["organizations" organization (str-ltrim-char resource \/)]) resource)
          url-obj (java.net.URL. (java.net.URL. server-url) resource-path)
          url (.toString url-obj)
-         timestamp (time-format/unparse iso8601 (t/now))                   
+         timestamp (time-format/unparse iso8601 (t/now))
          headers (auth-headers method (.getPath url-obj) (get :body opts) timestamp client-name client-key auth-version chef-api-version)
          opts (merge default-http-opts {:headers headers } opts)
          ]
@@ -48,15 +48,15 @@
 
 (def ^:private vec-butlast (comp vec butlast))
 
-(defn zip-args [path-parts args] 
+(defn zip-args [path-parts args]
 	(if (empty? path-parts) []
-		(let [	[p & more-parts] path-parts 
+		(let [	[p & more-parts] path-parts
 				[a & more-args] args]
-			(if (keyword? p) 
-				(cons a (zip-args more-parts more-args)) 
+			(if (keyword? p)
+				(cons a (zip-args more-parts more-args))
 				(cons p (zip-args more-parts args))))))
 
-(defn chef-rest-call 
+(defn chef-rest-call
 	([method path-spec path-args] (chef-rest-call method path-spec path-args nil))
 	([method path-spec path-args data]
 		(let [resource-path (string/join "/" (zip-args path-spec path-args))
@@ -65,6 +65,11 @@
 			(json/parse-string
 				(:body (chef-rest *chef-config* method resource-path opts)
 	)))))
+
+(defn make-obj-list [model path-components arguments]
+	(let [fname ((comp symbol str) (name model) "-list")]
+        `(defn ~fname ~arguments
+        	(chef-rest-call :get ~path-components ~arguments))))
 
 ;  the book says generating multiple defs from one macro is bad.
 ;  let's do it anyway (until i figure out how to do it the proper way and still have nice syntax)
@@ -77,18 +82,15 @@
     (concat `(do)
       ; define *-list functions
       (when (= (last path-components) :id)
-      	(let [args (vec-butlast arguments)
-      		  path-components (vec-butlast path-components)
-      		  fname ((comp symbol str) (name model) "-list")
-      		 ]
-        	(list `(defn ~fname ~args
-          		(chef-rest-call :get ~path-components ~args)))))
-      
+      	(let [path-components (vec-butlast path-components)
+              args (vec-butlast arguments)]
+        	(list (make-obj-list model path-components args))))
+
       (for [method methods :let [fname ((comp symbol str) (name model) "-" (method methods-func-names))]]
         (case method
-          :put (let [obj-sym (gensym 'obj) args (conj arguments obj-sym)] 
+          :put (let [obj-sym (gensym 'obj) args (conj arguments obj-sym)]
           	`(defn ~fname ~args
-                  (chef-rest-call ~method ~path-components ~arguments 
+                  (chef-rest-call ~method ~path-components ~arguments
                                             (json/generate-string ~obj-sym))))
           ; default
           `(defn ~fname ~arguments

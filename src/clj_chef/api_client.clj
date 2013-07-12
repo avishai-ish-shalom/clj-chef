@@ -25,10 +25,12 @@
 (defrest :role "/roles/:id" [:get :delete :put])
 (defrest :environment "/environments/:id" [:get :delete :put])
 (defrest :environment-node "/environments/:id/nodes" [:get])
+(defrest :environment-recipe "/environments/:id/recipes" [:get])
+(defrest :environment-cookbook "/environments/:environment/cookbooks/:id" [:get])
 (defrest :data-bag "/data/:id" [:get :delete :put])
 (defrest :data-bag-item "/data/:bag/:item" [:get :delete :put])
-(defrest :cookbook "/cookbooks/:id" [:get :delete :put])
-(defrest :cookbook-version "/cookbooks/:name/:version" [:get])
+(defrest :cookbook "/cookbooks/:id" [:get])
+(defrest :cookbook-version "/cookbooks/:name/:version" [:get :delete])
 
 (defn search
   [index-name query]
