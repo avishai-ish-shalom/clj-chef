@@ -3,6 +3,8 @@
 This is an API library for talking to [Opscode Chef](http://www.opscode.com/chef/) servers.
 Although this library is already usable it is still rough around the edges and needs more work. Contributors welcome!
 
+Most of the chef server API is covered, some calls intentionally omitted because they are only used by chef-client/solo and not by knife. Also omitted `cookbook-upload` because it requires parsing ruby files to impelement correctly.
+
 The project uses [Midje](https://github.com/marick/Midje/).
 
 ## How to use
@@ -29,7 +31,7 @@ API functions follow the naming scheme of knife, e.g. node-list, node-create, no
 Currently functions return raw maps representing Chef objects.
 
 The search function follows the ruby form (more or less):
-	
+
 	(chef/with-config conf (chef/search :node "*:*"))
 
 ## How to run the tests
