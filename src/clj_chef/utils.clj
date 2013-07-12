@@ -1,3 +1,21 @@
+; Copyright (c) Avishai Ish-Shalom. All rights reserved.
+;
+; This file is part of the clj-chef library.
+; clj-chef is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;
+; Authors: Avishai Ish-Shalom
+
 (ns clj-chef.utils
   (:require [clj-http.client :as http-client]
             [clojure.string :as string]
@@ -51,7 +69,7 @@
     "1.0" username
     username))
 
-(defn- auth-canonical-request [method url-path hashed-body timestamp client-name auth-version] 
+(defn- auth-canonical-request [method url-path hashed-body timestamp client-name auth-version]
   (let [upcase-method (string/upper-case (name method))]
     (string/join "\n"
       (map (partial string/join ":")
@@ -69,7 +87,7 @@
         hashed-body (digest-sha1 body)
         canonical-request (auth-canonical-request method url-path hashed-body timestamp client-name auth-version)
         signature (rsa-sign client-key canonical-request)
-        signature-parts (map (partial apply str) (partition 64 64 nil signature))          
+        signature-parts (map (partial apply str) (partition 64 64 nil signature))
         signature-headers (reduce conj {}
           (map-indexed (fn [i part] [(str "X-Ops-Authorization-" (inc i)) part]) signature-parts))
         ]

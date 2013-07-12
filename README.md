@@ -43,3 +43,6 @@ The search function follows the ruby form (more or less):
 `lein midje :autotest` will run all the tests indefinitely. It sets up a
 watcher on the code files. If they change, only the relevant tests will be
 run again.
+
+## License
+This library is licensed under the LGPL v3 license. See LICENSE file for more details
