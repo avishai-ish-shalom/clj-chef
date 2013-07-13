@@ -33,9 +33,11 @@
 (def ^:private bytes-type (Class/forName "[B"))
 (Security/addProvider (BouncyCastleProvider.))
 
-(defn str-ltrim-char [s c]
-  (if (.startsWith s (str c)) (string/replace-first s c nil)
-    s))
+(defn str-ltrim-char
+  "Remove all occurences of c from the start of a string. c must be a char
+    (str-ltrim-char \"XXXtestXtest\" \\X) ==> \"testXtest\"
+  "
+  [s c] (assert (= (class c) Character) "second argument must be a Character") (apply str (drop-while #(= %1 c) s)))
 
 (defn- base64-decode
   "Decode a base64 encoded string"

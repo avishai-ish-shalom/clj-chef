@@ -19,7 +19,7 @@
 (ns clj-chef.t-utils
   (:use midje.sweet
         [midje.util :only [testable-privates]]
-        [clj-chef.api-client]
+        [clj-chef.utils]
         ))
 
 (defn- is-type [t] (fn [result] (= (type result) t)))
@@ -42,3 +42,13 @@
 
 (fact "`base64-decode` should decode base64 sample string"
   (base64-decode "U2FtcGxlIFN0cmluZw==") => "Sample String")
+
+(facts "about `str-ltrim-char`"
+  (fact "should remove all occurenecs of c at the beggining of s"
+    (str-ltrim-char "/////test1" \/) => "test1"
+    (str-ltrim-char "/test2" \/) => "test2")
+  (fact "shouldn't remove occurenecs in the middle of a string"
+    (str-ltrim-char "test//test/test" \/) => "test//test/test")
+  (fact "throws exception if c isn't a java.lang.Character"
+    (str-ltrim-char "test/test" "te") => (throws java.lang.AssertionError))
+  )

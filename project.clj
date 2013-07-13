@@ -26,5 +26,5 @@
                  [org.bouncycastle/bcprov-jdk16 "1.46"]
                  [log4j/log4j "1.2.17"]
                  ]
-  :profiles {:dev {:dependencies [[midje "1.5.0"]]}})
+  :profiles {:dev {:dependencies [[midje "1.5.1"]]}})
 
