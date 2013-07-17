@@ -30,6 +30,8 @@
 (def cookbook-version "0.1.0")
 (def environment-id "test-env")
 
+(def opscode-api-url "https://api.opscode.com/")
+
 (background (around :facts (with-config ...config... ?form)))
 
 ; Description of the library interface. we should never ever break this.
@@ -37,8 +39,8 @@
 ; Right now, negative tests are missing and the exceptions are not speced. this should be fixed later on
 (facts "`defrest` generated functions for node"
   (let [node-path (str "/nodes/" node-id)]
-    (fact (node-list) => (just {})
-      (provided (chef-rest ...config... :get "/nodes" nil) => {:body "{}"}))
+    (fact (node-list) => (just ["somenode"])
+      (provided (chef-rest ...config... :get "/nodes" nil) => {:body "{\"somenode\": \"https://api.opscode.com/nodes/somenode\"}"}))
     (fact (node-show node-id) => {"id" node-id}
       (provided
         (chef-rest ...config... :get node-path nil) => {:body (json/generate-string {"id" node-id})}))
@@ -54,8 +56,9 @@
 
 (facts "`defrest` generated functions for role"
   (let [role-path (str "/roles/" role-id)]
-    (fact (role-list) => (just {})
-      (provided (chef-rest ...config... :get "/roles" nil) => {:body "{}"}))
+    (fact (role-list) => (just [role-id])
+      (provided (chef-rest ...config... :get "/roles" nil) => {:body
+          (json/generate-string { role-id (str opscode-api-url "roles/" role-id)})}))
     (fact (role-show role-id) => {"id" role-id}
       (provided
         (chef-rest ...config... :get role-path nil) => {:body (json/generate-string {"id" role-id})}))
@@ -71,8 +74,13 @@
 
 (facts "`defrest` generated functions for cookbook"
   (let [cookbook-path (str "/cookbooks/" cookbook-id)]
-    (fact (cookbook-list) => (just {})
-      (provided (chef-rest ...config... :get "/cookbooks" nil) => {:body "{}"}))
+    (fact "cookbook-list" (cookbook-list) => (just {"unicorn" ["1.3.0"]})
+      (provided
+        (chef-rest ...config... :get "/cookbooks" nil) => {:body
+          (json/generate-string
+             {"unicorn" {"url" (str opscode-api-url "cookbooks/unicorn"),
+                     "versions" [{"version" "1.3.0", "url"
+                                  (str opscode-api-url "cookbooks/unicorn/1.3.0")}]}})}))
     (fact (cookbook-show cookbook-id) => {"id" cookbook-id}
       (provided
         (chef-rest ...config... :get cookbook-path nil) => {:body (json/generate-string {"id" cookbook-id})}))
@@ -80,9 +88,7 @@
 
 (facts "`defrest` generated functions for cookbook version"
   (let [cookbook-version-path (str "/cookbooks/" cookbook-id "/" cookbook-version)]
-    (fact (cookbook-list) => (just {})
-      (provided (chef-rest ...config... :get "/cookbooks" nil) => {:body "{}"}))
-    (fact "cookbook-version-show"
+     (fact "cookbook-version-show"
       (cookbook-version-show cookbook-id cookbook-version) => {"id" cookbook-id}
       (provided
         (chef-rest ...config... :get cookbook-version-path nil) => {:body (json/generate-string {"id" cookbook-id})}))
@@ -94,8 +100,10 @@
 
 (facts "`defrest` generated functions for environment"
   (let [environment-path (str "/environments/" environment-id)]
-    (fact (environment-list) => (just {})
-      (provided (chef-rest ...config... :get "/environments" nil) => {:body "{}"}))
+    (fact (environment-list) => (just [environment-id])
+      (provided
+        (chef-rest ...config... :get "/environments" nil) => {:body
+            (json/generate-string {environment-id (str opscode-api-url "environments/" environment-id)})}))
     (fact (environment-show environment-id) => {"id" environment-id}
       (provided
         (chef-rest ...config... :get environment-path nil) => {:body (json/generate-string {"id" environment-id})}))
@@ -113,8 +121,13 @@
   (let [environment-cookbook-path (str "/environments/" environment-id "/cookbooks/" cookbook-id)
         environment-cookbooks-path (str "/environments/" environment-id "/cookbooks")]
     (fact "environment-cookbook-list"
-      (environment-cookbook-list environment-id) => (just {})
-      (provided (chef-rest ...config... :get environment-cookbooks-path nil) => {:body "{}"}))
+      (environment-cookbook-list environment-id) => (just {"unicorn" ["1.3.0"]})
+      (provided
+        (chef-rest ...config... :get environment-cookbooks-path nil) => {:body
+          (json/generate-string
+             {"unicorn" {"url" (str opscode-api-url "cookbooks/unicorn"),
+                     "versions" [{"version" "1.3.0", "url"
+                                  (str opscode-api-url "cookbooks/unicorn/1.3.0")}]}})}))
     (fact "environment-cookbook-show"
       (environment-cookbook-show environment-id cookbook-id) => {"id" environment-id}
       (provided

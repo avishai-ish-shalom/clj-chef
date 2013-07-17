@@ -38,17 +38,23 @@
      ~@forms))
 
 ; defrest is in clj-chef.rest namespace
-(defrest :node "/nodes/:id" [:get :delete :put])
-(defrest :client "/clients/:id" [:get :delete :put])
-(defrest :role "/roles/:id" [:get :delete :put])
-(defrest :environment "/environments/:id" [:get :delete :put])
+(defrest :node "/nodes/:id" [:get :delete :put] :list-parser (comp vec keys))
+(defrest :client "/clients/:id" [:get :delete :put] :list-parser (comp vec keys))
+(defrest :role "/roles/:id" [:get :delete :put] :list-parser (comp vec keys))
+(defrest :environment "/environments/:id" [:get :delete :put] :list-parser (comp vec keys))
 (defrest :environment-node "/environments/:id/nodes" [:get])
 (defrest :environment-recipe "/environments/:id/recipes" [:get])
-(defrest :environment-cookbook "/environments/:environment/cookbooks/:id" [:get])
+(defrest :environment-cookbook "/environments/:environment/cookbooks/:id" [:get]
+  :list-parser (comp
+   (partial into {})
+   (partial map (fn [[k v]] [k (map #(get %1 "version") (get v "versions"))]))))
 (defrest :data-bag "/data/:id" [:get :delete :put])
 (defrest :data-bag-item "/data/:bag/:item" [:get :delete :put])
-(defrest :cookbook "/cookbooks/:id" [:get])
-(defrest :cookbook-version "/cookbooks/:name/:version" [:get :delete])
+(defrest :cookbook "/cookbooks/:id" [:get]
+  :list-parser (comp
+   (partial into {})
+   (partial map (fn [[k v]] [k (map #(get %1 "version") (get v "versions"))]))))
+(defrest :cookbook-version "/cookbooks/:name/:version" [:get :delete] )
 
 (defn search
   [index-name query]

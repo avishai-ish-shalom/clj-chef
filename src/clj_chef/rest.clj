@@ -84,25 +84,27 @@
 				(:body (chef-rest *chef-config* method resource-path opts)
 	)))))
 
-(defn make-obj-list [model path-components arguments]
+(defn make-obj-list [model path-components arguments parser]
 	(let [fname ((comp symbol str) (name model) "-list")]
         `(defn ~fname ~arguments
-        	(chef-rest-call :get ~path-components ~arguments))))
+        	(~parser (chef-rest-call :get ~path-components ~arguments)))))
 
 ;  the book says generating multiple defs from one macro is bad.
 ;  let's do it anyway (until i figure out how to do it the proper way and still have nice syntax)
 ;  TODO: improve this horrible macro
 ;  TODO: define multiple function versions with different arity (support optional opts argument)
-(defmacro defrest [model path-spec methods]
+(defmacro defrest [model path-spec methods & opts]
+  (assert (even? (count opts)))
   (let [methods-func-names {:get "show" :put "create" :delete "delete"}
         [path-components arguments] (map vec (split-path-spec path-spec))
+        opts (apply hash-map opts)
        ]
     (concat `(do)
       ; define *-list functions
       (when (= (last path-components) :id)
       	(let [path-components (vec-butlast path-components)
               args (vec-butlast arguments)]
-        	(list (make-obj-list model path-components args))))
+        	(list (make-obj-list model path-components args (get opts :list-parser first)))))
 
       (for [method methods :let [fname ((comp symbol str) (name model) "-" (method methods-func-names))]]
         (case method
