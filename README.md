@@ -24,7 +24,7 @@ Currently the config is something like:
 
 After loading the config you can use the `with-config` macro with `clj-chef.api_client` functions:
 
-	(require '[clj-chef.api_client :as chef])
+	(require '[clj-chef.api-client :as chef])
 	(chef/with-config conf (chef/role-list))
 
 API functions follow the naming scheme of knife, e.g. node-list, node-create, node-delete, etc.
