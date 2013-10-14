@@ -34,6 +34,8 @@ The search function follows the ruby form (more or less):
 
 	(chef/with-config conf (chef/search :node "*:*"))
 
+`node-show` will return a `ChefNode` record on which you can call a few convience methods like `save`, `get-attribute`, `set-attribute` and `name`. The `get-attribute` method employs the same deep-merge logic as in Chef; If you want to access particular attibute levels just use something like `(get-in node ["default" ..]). `set-attribute` will `assoc-in` an attribute in the normal level.
+
 ## How to run the tests
 
 `lein midje` will run all tests.

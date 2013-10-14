@@ -23,7 +23,7 @@
             [clj-time.core :as t]
             [clojure.java.io :as io]
             [clojure.tools.logging :as logging])
-  (:import [java.security MessageDigest KeyFactory Security]
+  (:import [java.security MessageDigest KeyFactory Security Key]
            [javax.crypto Cipher]
            [java.security.interfaces RSAPrivateKey]
            [org.bouncycastle.jce.provider BouncyCastleProvider]
@@ -59,9 +59,9 @@
     (let [digest-obj (MessageDigest/getInstance "sha1")]
       (.digest digest-obj (.getBytes msg)))))
 
-(defn rsa-sign [private-key data]
+(defn rsa-sign [^Key private-key data]
   (base64-encode
-    (let [cipher (Cipher/getInstance "RSA")]
+    (let [^Cipher cipher (Cipher/getInstance "RSA")]
       (.init cipher Cipher/ENCRYPT_MODE private-key)
       (.doFinal cipher (.getBytes data)))))
 
@@ -71,13 +71,19 @@
     "1.0" username
     username))
 
+(defn- auth-canonical-path [url-path]
+  (let [url-path (string/replace url-path #"/+" "/")]
+    (if (> (count url-path) 1)
+      (string/replace url-path #"/$" "")
+      url-path)))
+
 (defn- auth-canonical-request [method url-path hashed-body timestamp client-name auth-version]
   (let [upcase-method (string/upper-case (name method))]
     (string/join "\n"
       (map (partial string/join ":")
        [
          ["Method" upcase-method]
-         ["Hashed Path" (digest-sha1 url-path)]
+         ["Hashed Path" (digest-sha1 (auth-canonical-path url-path))]
          ["X-Ops-Content-Hash" hashed-body]
          ["X-Ops-Timestamp" timestamp]
          ["X-Ops-UserId" (auth-canonical-user-name client-name auth-version)]

@@ -42,7 +42,7 @@
          url-obj (java.net.URL. (java.net.URL. server-url) resource-path)
          url (.toString url-obj)
          timestamp (time-format/unparse iso8601 (t/now))
-         headers (auth-headers method (.getPath url-obj) (get :body opts) timestamp client-name client-key auth-version chef-api-version)
+         headers (auth-headers method (.getPath url-obj) (get opts :body) timestamp client-name client-key auth-version chef-api-version)
          opts (merge default-http-opts {:headers headers } opts)
          ]
     ; do the http call and return result
@@ -93,11 +93,24 @@
 ;  let's do it anyway (until i figure out how to do it the proper way and still have nice syntax)
 ;  TODO: improve this horrible macro
 ;  TODO: define multiple function versions with different arity (support optional opts argument)
-(defmacro defrest [model path-spec methods & opts]
+(defmacro defrest
+  "Define rest functions for a model. Functions will be generated for :get, :put, :delet HTTP methods and will be named `model`-show,create,delete.
+  In addition, if the path-spec end with :id (see below) an additional function `model`-list will be generated. E.g. if the model is \"node\" and path spec is \"/node/:id\" the following functions will be generated:
+  (node-list []), (node-create [id obj]), (node-show [id]), (node-delete [id])
+  Function arguments for generated methods will be based on the path-spec: keyword like components will become function arguments and the path-spec will be a template for the URI of the model such that keyword components will be subtituted by function arguments. E.g. path-spec of \"/environments/:environment/cookbooks/:id\" for the env-cookbook model will generate a show method:
+  (env-cookbook-show [environment id])
+
+  This macro accepts additional options: :list-parser and :obj-parser
+  :list-parser - parse the result of object listing REST call
+  :obj-parser - parse the result of object retrieval
+  These accept function which will be called on responses as appropriate.
+  "
+  [model path-spec methods & opts]
   (assert (even? (count opts)))
   (let [methods-func-names {:get "show" :put "create" :delete "delete"}
         [path-components arguments] (map vec (split-path-spec path-spec))
         opts (apply hash-map opts)
+        coerce-fn (get opts :obj-parser identity)
        ]
     (concat `(do)
       ; define *-list functions
@@ -110,9 +123,9 @@
         (case method
           :put (let [obj-sym (gensym 'obj) args (conj arguments obj-sym)]
           	`(defn ~fname ~args
-                  (chef-rest-call ~method ~path-components ~arguments
-                                            (json/generate-string ~obj-sym))))
+                   (~coerce-fn (chef-rest-call ~method ~path-components ~arguments
+                                    (json/generate-string ~obj-sym)))))
           ; default
           `(defn ~fname ~arguments
-            (chef-rest-call ~method ~path-components ~arguments))
+            (~coerce-fn (chef-rest-call ~method ~path-components ~arguments)))
     )))))

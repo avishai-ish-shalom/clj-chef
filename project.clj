@@ -16,8 +16,8 @@
 ;
 ; Authors: Avishai Ish-Shalom
 
-(defproject clj-chef "0.0.1-SNAPSHOT"
-  :description "Cool new project to do things and stuff"
+(defproject clj-chef "0.1.0-SNAPSHOT"
+  :description "Chef API client library"
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [cheshire "5.2.0"]
                  [org.clojure/tools.logging "0.2.6"]
@@ -27,4 +27,3 @@
                  [log4j/log4j "1.2.17"]
                  ]
   :profiles {:dev {:dependencies [[midje "1.5.1"]]}})
-
