@@ -22,19 +22,21 @@ Currently the config is something like:
 
 	(def conf (clj-chef.api-client/read-config "/path/to/config.edn"))
 
+If you are generating the config map yourself, make sure the value of :client-key is a `RSAPrivateKey` object. You can use the `load-key` function to read a PEM encoded key and return the correct object.
+
 After loading the config you can use the `with-config` macro with `clj-chef.api_client` functions:
 
 	(require '[clj-chef.api-client :as chef])
 	(chef/with-config conf (chef/role-list))
 
 API functions follow the naming scheme of knife, e.g. node-list, node-create, node-delete, etc.
-Currently functions return raw maps representing Chef objects.
+Currently, most functions return raw maps representing Chef objects.
 
 The search function follows the ruby form (more or less):
 
 	(chef/with-config conf (chef/search :node "*:*"))
 
-`node-show` will return a `ChefNode` record on which you can call a few convience methods like `save`, `get-attribute`, `set-attribute` and `name`. The `get-attribute` method employs the same deep-merge logic as in Chef; If you want to access particular attibute levels just use something like `(get-in node ["default" ..]). `set-attribute` will `assoc-in` an attribute in the normal level.
+`node-show` will return a `ChefNode` record on which you can call a few convience methods like `save`, `get-attribute`, `set-attribute` and `name`. The `get-attribute` method employs the same deep-merge logic as in Chef; If you want to access particular attibute levels just use something like `(get-in node ["default" ..])`. set-attribute` will `assoc-in` an attribute in the normal level.
 
 ## How to run the tests
 
