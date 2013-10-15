@@ -20,7 +20,7 @@ Currently the config is something like:
 
 `clj-chef.core` has a convience method for loading the config and the client key in one step:
 
-	(def conf (clj-chef.core/read-config "/path/to/config.edn"))
+	(def conf (clj-chef.api-client/read-config "/path/to/config.edn"))
 
 After loading the config you can use the `with-config` macro with `clj-chef.api_client` functions:
 
