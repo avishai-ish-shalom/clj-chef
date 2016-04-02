@@ -18,12 +18,18 @@
 
 (defproject clj-chef "0.1.0-SNAPSHOT"
   :description "Chef API client library"
-  :dependencies [[org.clojure/clojure "1.5.1"]
-                 [cheshire "5.2.0"]
-                 [org.clojure/tools.logging "0.2.6"]
-                 [clj-http "0.7.2"]
-                 [clj-time "0.5.1"]
+  :license "LGPL v3"
+  :url "https://github.com/avishai-ish-shalom/clj-chef"
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [cheshire "5.5.0"]
+                 [org.clojure/tools.logging "0.3.1"]
+                 [clj-http "2.1.0"]
+                 [clj-time "0.11.0"]
                  [org.bouncycastle/bcprov-jdk16 "1.46"]
-                 [log4j/log4j "1.2.17"]
                  ]
-  :profiles {:dev {:dependencies [[midje "1.5.1"]]}})
+  :profiles {:dev {
+                   :dependencies [[midje "1.8.3"]
+                                  [log4j/log4j "1.2.17"]
+                                  ]
+                   :plugins [[lein-midje "3.2"]]
+                   }})
